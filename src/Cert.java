@@ -1,7 +1,12 @@
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
 import javax.sound.midi.Soundbank;
 import java.math.BigInteger;
 import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
@@ -9,9 +14,15 @@ import java.security.cert.X509Certificate;
 import java.sql.SQLOutput;
 
 public class Cert {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws NoSuchAlgorithmException, KeyManagementException {
+        MyManager trm = new MyManager();
+
+        SSLContext sc = SSLContext.getInstance("SSL");
+        sc.init(null, new TrustManager[] { trm }, null);
+        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+
         try {
-            certInformation("https://facebook.com");
+            certInformation("https://expired.badssl.com/");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -36,7 +47,7 @@ public class Cert {
                     x.checkValidity();
                     System.out.println("Sertifika  tarihi geçerli");
                 } catch (CertificateExpiredException ex) {
-                    System.out.println("Sertifika tarşhş geömşlş");
+                    System.out.println("Sertifika tarşhş geçmiş");
                 } catch (CertificateNotYetValidException ex) {
                     System.out.println("Sertifika daha gecerlililk tarihi gelmemis");
                 }
